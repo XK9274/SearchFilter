@@ -75,6 +75,7 @@ class Display {
     int repeat_ticks = 0;
 
   public:
+    bool lib_mode = false;
     SDL_Color COLOR_BG = {0, 0, 0};
     SDL_Color COLOR_FG = {255, 255, 255};
     SDL_Color COLOR_LABEL = {255, 255, 255};
@@ -113,7 +114,10 @@ class Display {
         TTF_CloseFont(fonts.regular);
         TTF_CloseFont(fonts.label);
         SDL_FreeSurface(screen);
-        SDL_Quit();
+        
+        if (!lib_mode) {
+            SDL_Quit(); // don't quit SDL if we're in lib mode or the parent dies
+        }
         // std::cerr << "DISPLAY DOWN" << std::endl;
     }
 

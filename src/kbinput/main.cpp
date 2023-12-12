@@ -74,6 +74,7 @@ entry point for the library version of kbinput
 extern "C" const char* launch_keyboard(const char *initial_value, const char *title) { 
     Display* display = new Display();
     Keyboard* kb = new Keyboard(display, initial_value, title);
+    display->lib_mode = true; // track libmode for the destructor
     
     int quit = 0;
     std::string result = "";
@@ -101,6 +102,7 @@ extern "C" const char* launch_keyboard(const char *initial_value, const char *ti
         strcpy(return_value, result.c_str());
     } 
     
+    delete display;
     delete kb;
     return return_value;
 }
