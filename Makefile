@@ -28,7 +28,7 @@ build: .setup
 	cd ./src/filter && BUILD_DIR=$(BUILD_DIR) VERSION=$(VERSION) make
 	cd ./src/search && BUILD_DIR=$(BUILD_DIR) VERSION=$(VERSION) make
 	cd ./src/tools && BUILD_DIR=$(BUILD_DIR) VERSION=$(VERSION) make
-	cd ./src/kbinput && BUILD_DIR=$(BUILD_DIR) VERSION=$(VERSION) make
+	cd ./src/kbinput && BUILD_DIR=$(BUILD_DIR) VERSION=$(VERSION) make && LIB_DIR=$(LIB_DIR) VERSION=$(VERSION) make lib
 
 release: build
 	@echo :: $(TARGET) - release

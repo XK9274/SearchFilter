@@ -65,3 +65,42 @@ int main(int argc, char** argv)
 
     return kb->cancelled;
 }
+
+
+/* 
+entry point for the library version of kbinput
+*/
+
+extern "C" const char* launch_keyboard(const char *initial_value, const char *title) { 
+    Display* display = new Display();
+    Keyboard* kb = new Keyboard(display, initial_value, title);
+    
+    int quit = 0;
+    std::string result = "";
+
+    auto input_handler = [&kb](SDLKey key, Uint8 type, int repeating) {
+        return kb->handleKeyPress(key, type, repeating);
+    };
+
+    auto frame_handler = [display, input_handler](void) {
+        return display->onInputEvent(input_handler);
+    };
+
+    while (!quit) {
+        quit = display->requestFrame(frame_handler);
+    }
+
+    if (!kb->cancelled) {
+        result = kb->getValue();
+        // std::cout << "\n\nRESULT:" << std::endl;
+        // std::cout << result << std::endl;
+    } 
+    
+    char* return_value = (char*)malloc(result.length() + 1);  
+    if (return_value != NULL) {
+        strcpy(return_value, result.c_str());
+    } 
+    
+    delete kb;
+    return return_value;
+}
