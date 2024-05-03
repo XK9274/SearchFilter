@@ -71,38 +71,55 @@ int main(int argc, char** argv)
 entry point for the library version of kbinput
 */
 
-extern "C" const char* launch_keyboard(const char *initial_value, const char *title) { 
-    Display* display = new Display();
-    Keyboard* kb = new Keyboard(display, initial_value, title);
-    display->lib_mode = true; // track libmode for the destructor
-    
-    int quit = 0;
-    std::string result = "";
+extern "C" const char* launch_keyboard(const char* initial_value, const char* title) {
+    Display* display = nullptr;
+    Keyboard* kb = nullptr;
+    char* return_value = nullptr;
 
-    auto input_handler = [&kb](SDLKey key, Uint8 type, int repeating) {
-        return kb->handleKeyPress(key, type, repeating);
-    };
+    try {
+        display = new Display();
 
-    auto frame_handler = [display, input_handler](void) {
-        return display->onInputEvent(input_handler);
-    };
+        kb = new Keyboard(display, initial_value, title);
 
-    while (!quit) {
-        quit = display->requestFrame(frame_handler);
+        display->lib_mode = true; // track libmode for the destructor
+
+        int quit = 0;
+        std::string result = "";
+
+        auto input_handler = [&kb](SDLKey key, Uint8 type, int repeating) {
+            return kb->handleKeyPress(key, type, repeating);
+        };
+
+        auto frame_handler = [display, input_handler](void) {
+            return display->onInputEvent(input_handler);
+        };
+
+        while (!quit) {
+            quit = display->requestFrame(frame_handler);
+        }
+
+        if (!kb->cancelled) {
+            result = kb->getValue();
+            std::cout << "\n\nRESULT:" << std::endl;
+            std::cout << result << std::endl;
+        }
+
+        return_value = (char*)malloc(result.length() + 1);
+        if (return_value != nullptr) {
+            strcpy(return_value, result.c_str());
+        }
+    }
+    catch (const std::exception& e) {
+        std::cout << "\n\nERROR:" << std::endl;
+        std::cout << "Exception caught in launch_keyboard: " << e.what() << std::endl;
+    }
+    catch (...) {
+        std::cout << "\n\nERROR:" << std::endl;
+        std::cout << "Unknown exception caught in launch_keyboard" << std::endl;
     }
 
-    if (!kb->cancelled) {
-        result = kb->getValue();
-        // std::cout << "\n\nRESULT:" << std::endl;
-        // std::cout << result << std::endl;
-    } 
-    
-    char* return_value = (char*)malloc(result.length() + 1);  
-    if (return_value != NULL) {
-        strcpy(return_value, result.c_str());
-    } 
-    
     delete display;
     delete kb;
+
     return return_value;
 }
